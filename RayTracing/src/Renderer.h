@@ -2,20 +2,21 @@
 
 #include "Walnut/Image.h"
 #include <memory>
-#include "glm/glm.hpp"
+#include "Camera.h"
+#include "Ray.h"
 
 class Renderer
 {
 public:
 
 	void OnResize(uint32_t width, uint32_t height);
-	void Render();
+	void Render(const Camera& m_Camera);
 
 	std::shared_ptr<Walnut::Image> GetFinalImage() { return m_FinalImage; }
 
 private:
 
-	glm::vec4 PerPixel(glm::vec2 coord);
+	glm::vec4 TraceRay(const Ray& ray);
 
 private:
 
