@@ -17,13 +17,29 @@ public:
 	ExampleLayer() :
 		m_Camera(45.0f, 0.1f, 100.0f)
 	{
-		
-		Sphere sphere;
-		sphere.Position = { 0.0f, 0.0f, 0.0f };
-		sphere.Radius = 0.5f;
-		sphere.Albedo = { 1.0f, 0.0f, 0.0f };
-		m_Scene.Spheres.push_back(sphere);
-		
+		Material& PinkMaterial = m_Scene.Materials.emplace_back();
+		PinkMaterial.Albedo = { 1.0f, 0.0f, 1.0f };
+		PinkMaterial.Roughness = 0.0f;
+
+		Material& BlueMaterial = m_Scene.Materials.emplace_back();
+		BlueMaterial.Albedo = { 0.2f, 0.3f, 1.0f };
+		BlueMaterial.Roughness = 0.1f;
+
+		{
+			Sphere sphere;
+			sphere.Position = { 0.0f, 0.0f, 0.0f };
+			sphere.Radius = 1.0f;
+			sphere.MaterialIndex = 0;
+			m_Scene.Spheres.push_back(sphere);
+		}
+
+		{
+			Sphere sphere;
+			sphere.Position = { 0.0f, -101.0f, 0.0f };
+			sphere.Radius = 100.0f;
+			sphere.MaterialIndex = 1;
+			m_Scene.Spheres.push_back(sphere);
+		}
 	}
 
 	void OnUpdate(float ts) override
@@ -51,7 +67,7 @@ public:
 
 			ImGui::DragFloat3("Position", glm::value_ptr(sphere.Position), 0.1f);
 			ImGui::DragFloat("Radius", &sphere.Radius, 0.1f);
-			ImGui::ColorEdit3("Scale", glm::value_ptr(sphere.Albedo), 0.1f);
+			ImGui::DragInt("Material Index", &sphere.MaterialIndex, 1.0f, 0.0f, m_Scene.Materials.size() - 1);
 
 			ImGui::Separator();
 
@@ -60,6 +76,28 @@ public:
 
 		if (ImGui::Button("Add Sphere"))
 			AddSphere();
+		if (ImGui::Button("Remove Sphere"))
+			RemoveSphere();
+
+		for (size_t i = 0; i < m_Scene.Materials.size(); i++)
+		{
+			ImGui::PushID(i);
+
+			Material& material = m_Scene.Materials[i];
+
+			ImGui::ColorEdit3("Color", glm::value_ptr(material.Albedo), 0.1f);
+			ImGui::DragFloat("Roughness", &material.Roughness, 0.05f, 0.0f, 1.0f);
+			ImGui::DragFloat("Metallic", &material.Metallic, 0.05f, 1.0f);
+
+			ImGui::Separator();
+
+			ImGui::PopID();
+		}
+
+		if (ImGui::Button("Add Material"))
+			AddMaterial();
+		if (ImGui::Button("Remove Material"))
+			RemoveMaterial();
 
 		ImGui::End();
 
@@ -96,8 +134,28 @@ public:
 		Sphere sphere;
 		sphere.Position = { 0.0f, 0.0f, 0.0f };
 		sphere.Radius = 0.5f;
-		sphere.Albedo = { 1.0f, 1.0f, 0.0f };
+		sphere.MaterialIndex = 0;
 		m_Scene.Spheres.push_back(sphere);
+	}
+
+	void RemoveSphere()
+	{
+		m_Scene.Spheres.pop_back();
+	}
+
+	void AddMaterial()
+	{
+		Material material;
+		material.Albedo = glm::vec3(1.0f);
+		material.Roughness = 0.0f;
+		material.Metallic = 0.0f;
+
+		m_Scene.Materials.emplace_back(material);
+	}
+
+	void RemoveMaterial()
+	{
+		m_Scene.Materials.pop_back();
 	}
 
 private:
