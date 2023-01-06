@@ -22,7 +22,7 @@ public:
 		PinkMaterial.Roughness = 0.0f;
 
 		Material& BlueMaterial = m_Scene.Materials.emplace_back();
-		BlueMaterial.Albedo = { 0.2f, 0.3f, 1.0f };
+		BlueMaterial.Albedo = { 0.1f, 0.2f, 1.0f };
 		BlueMaterial.Roughness = 0.1f;
 
 		{
@@ -44,7 +44,8 @@ public:
 
 	void OnUpdate(float ts) override
 	{
-		m_Camera.OnUpdate(ts);
+		if (m_Camera.OnUpdate(ts))
+			m_Renderer.ResetFrameIndex();
 	}
 
 	virtual void OnUIRender() override
@@ -55,6 +56,12 @@ public:
 		{
 			Render();
 		}
+
+		ImGui::Checkbox("Accumulate", &m_Renderer.GetSettings().Accumulate);
+
+		if (ImGui::Button("Reset"))
+			m_Renderer.ResetFrameIndex();
+
 		ImGui::End();
 
 		ImGui::Begin("Scene");
